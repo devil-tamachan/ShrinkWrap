@@ -13,11 +13,13 @@ include( ${CGAL_USE_FILE} )
 # include_directories( ${MPFR_INCLUDE_DIR} )
 
 add_definitions( -DBOOST_ALL_NO_LIB )
-find_package(Boost 1.64.0 REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS}) 
+find_package(Boost 1.64.0 COMPONENTS program_options system thread REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIR})
 
 add_executable(ShrinkWrap
   ShrinkWrap.cpp
 )
 target_link_libraries( ShrinkWrap ${GMP_LIBRARIES} )
 target_link_libraries( ShrinkWrap ${MPFR_LIBRARIES} )
+target_link_libraries( ShrinkWrap ${Boost_LIBRARIES} )
