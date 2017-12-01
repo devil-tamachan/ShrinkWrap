@@ -250,12 +250,14 @@ bool MoveCameraAxis(Tree &tree, std::vector<Point> &pt, std::vector<uint64_t> &o
   return true;
 }
 
-bool ReadCameraPos(std::vector<double> &_cameraPos, const char *path)
+bool ReadCameraPos(std::vector<float> &_cameraPos, const char *path)
 {
   FILE *fp = fopen(path, "rb");
   if(fp==NULL)return false;
   _cameraPos.resize(3);
-  int readElement = fread(&(_cameraPos[0]), sizeof(double), 3, fp);
+  int readElement = fread(&(_cameraPos[0]), sizeof(float), 1, fp);
+  readElement += fread(&(_cameraPos[1]), sizeof(float), 1, fp);
+  readElement += fread(&(_cameraPos[2]), sizeof(float), 1, fp);
   return readElement==3;
 }
 
@@ -267,7 +269,7 @@ int main(int argc, char** argv)
   namespace po = boost::program_options;
   
   int mode = 0;
-  std::vector<double> _cameraPos;
+  std::vector<float> _cameraPos;
   
   po::options_description desc("options:");
   desc.add_options()
@@ -342,7 +344,7 @@ int main(int argc, char** argv)
       std::cout << "カメラ位置ファイルが指定されていません\n";
       return -1;
     }
-    bRet = ReadCameraPos(_cameraPos, vm["target"].as<std::string>().c_str());
+    bRet = ReadCameraPos(_cameraPos, vm["camera"].as<std::string>().c_str());
 
     if (bRet)
     {
