@@ -250,6 +250,15 @@ bool MoveCameraAxis(Tree &tree, std::vector<Point> &pt, std::vector<uint64_t> &o
   return true;
 }
 
+bool ReadCameraPos(std::vector<double> &_cameraPos, const char *path)
+{
+  FILE *fp = fopen(path, "rb");
+  if(fp==NULL)return false;
+  _cameraPos.resize(3);
+  int readElement = fread(&(_cameraPos[0]), sizeof(double), 3, fp);
+  return readElement==3;
+}
+
 #include <boost/program_options.hpp>
 #include <iostream>
 
@@ -267,7 +276,8 @@ int main(int argc, char** argv)
     ("in,i", po::value< std::string >(), "input file")
     ("target,t", po::value< std::string >(), "吸着先メッシュ入力")
     ("out,o", po::value< std::string >(), "output file")
-    ("camera,c", po::value<std::vector<double> >(&_cameraPos)->multitoken(), "変換モード4のみ使用。カメラ位置 (例: -c 0.0 10.0 5.0)")
+    //("camera,c", po::value<std::vector<double> >(&_cameraPos)->multitoken(), "変換モード4のみ使用。カメラ位置 (例: -c 0.0 10.0 5.0)")
+    ("camera,c", po::value< std::string >(), "変換モード4のみ使用。カメラ位置")
   ;
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -327,7 +337,14 @@ int main(int argc, char** argv)
     bRet = MoveXYZAxis(tree, pt, oivi, mode-1, fp);
     break;
   case 4:
-    if (_cameraPos.size()==3)
+    if (!vm.count("camera"))
+    {
+      std::cout << "カメラ位置ファイルが指定されていません\n";
+      return -1;
+    }
+    bRet = ReadCameraPos(_cameraPos, vm["target"].as<std::string>().c_str());
+
+    if (bRet)
     {
       Point ptCamera(_cameraPos[0], _cameraPos[1], _cameraPos[2]);
       bRet = MoveCameraAxis(tree, pt, oivi, ptCamera, fp);
