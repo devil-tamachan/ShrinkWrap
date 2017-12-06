@@ -1,11 +1,13 @@
 
 
+#if defined _WIN32 || defined __CYGWIN__
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <cstdint>
+#endif
 #include <stdio.h>
 #include <math.h>
 #include <vector>
-#include <cstdint>
 
 
 #include <iostream>
@@ -255,9 +257,7 @@ bool ReadCameraPos(std::vector<float> &_cameraPos, const char *path)
   FILE *fp = fopen(path, "rb");
   if(fp==NULL)return false;
   _cameraPos.resize(3);
-  int readElement = fread(&(_cameraPos[0]), sizeof(float), 1, fp);
-  readElement += fread(&(_cameraPos[1]), sizeof(float), 1, fp);
-  readElement += fread(&(_cameraPos[2]), sizeof(float), 1, fp);
+  int readElement = fread(&(_cameraPos[0]), sizeof(float), 3, fp);
   return readElement==3;
 }
 
@@ -274,12 +274,12 @@ int main(int argc, char** argv)
   po::options_description desc("options:");
   desc.add_options()
     ("help", "help")
-    ("mode,m", po::value<int>(&mode)->default_value(1), "•ÏŠ·ƒ‚[ƒh:\n\t0: Å’Z–Êã‚É‹z’…\n\t1/2/3: X/Y/Z²‚ğ§ŒÀ‚µ‚ÄÅ’Z–Êã‚É‹z’…\n\t4: ƒJƒƒ‰•ûŒü‚ÉˆÚ“®‚ğ§ŒÀ‚µ‚ÄÅ’Z–Êã‚É‹z’…")
+    ("mode,m", po::value<int>(&mode)->default_value(1), "å¤‰æ›ãƒ¢ãƒ¼ãƒ‰:\n\t0: æœ€çŸ­é¢ä¸Šã«å¸ç€\n\t1/2/3: X/Y/Zè»¸ã‚’åˆ¶é™ã—ã¦æœ€çŸ­é¢ä¸Šã«å¸ç€\n\t4: ã‚«ãƒ¡ãƒ©æ–¹å‘ã«ç§»å‹•ã‚’åˆ¶é™ã—ã¦æœ€çŸ­é¢ä¸Šã«å¸ç€")
     ("in,i", po::value< std::string >(), "input file")
-    ("target,t", po::value< std::string >(), "‹z’…æƒƒbƒVƒ…“ü—Í")
+    ("target,t", po::value< std::string >(), "å¸ç€å…ˆãƒ¡ãƒƒã‚·ãƒ¥å…¥åŠ›")
     ("out,o", po::value< std::string >(), "output file")
-    //("camera,c", po::value<std::vector<double> >(&_cameraPos)->multitoken(), "•ÏŠ·ƒ‚[ƒh4‚Ì‚İg—pBƒJƒƒ‰ˆÊ’u (—á: -c 0.0 10.0 5.0)")
-    ("camera,c", po::value< std::string >(), "•ÏŠ·ƒ‚[ƒh4‚Ì‚İg—pBƒJƒƒ‰ˆÊ’u")
+    //("camera,c", po::value<std::vector<float> >(&_cameraPos)->multitoken(), "å¤‰æ›ãƒ¢ãƒ¼ãƒ‰4ã®ã¿ä½¿ç”¨ã€‚ã‚«ãƒ¡ãƒ©ä½ç½® (ä¾‹: -c 0.0 10.0 5.0)")
+    ("camera,c", po::value< std::string >(), "å¤‰æ›ãƒ¢ãƒ¼ãƒ‰4ã®ã¿ä½¿ç”¨ã€‚ã‚«ãƒ¡ãƒ©ä½ç½®")
   ;
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -292,19 +292,19 @@ int main(int argc, char** argv)
   
   if (!vm.count("in"))
   {
-    std::cout << "“ü—Íƒtƒ@ƒCƒ‹‚ªw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ\n";
+    std::cout << "å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“\n";
     return -1;
   }
   
   if (!vm.count("target"))
   {
-    std::cout << "‹z’…æƒƒbƒVƒ…‚ªw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ\n";
+    std::cout << "å¸ç€å…ˆãƒ¡ãƒƒã‚·ãƒ¥ãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“\n";
     return -1;
   }
   
   if (!vm.count("out"))
   {
-    std::cout << "o—Íƒtƒ@ƒCƒ‹‚ªw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ\n";
+    std::cout << "å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“\n";
     return -1;
   }
   
@@ -341,7 +341,7 @@ int main(int argc, char** argv)
   case 4:
     if (!vm.count("camera"))
     {
-      std::cout << "ƒJƒƒ‰ˆÊ’uƒtƒ@ƒCƒ‹‚ªw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ\n";
+      std::cout << "ã‚«ãƒ¡ãƒ©ä½ç½®ãƒ•ã‚¡ã‚¤ãƒ«ãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“\n";
       return -1;
     }
     bRet = ReadCameraPos(_cameraPos, vm["camera"].as<std::string>().c_str());
